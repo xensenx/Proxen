@@ -64,8 +64,24 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+*:focus {
+    outline: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+*:active {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 html, body {
@@ -87,12 +103,20 @@ button,
 input,
 textarea,
 select,
-a {
+a,
+div,
+span {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+}
+
+button:focus,
+button:active,
+a:focus,
+a:active {
+    outline: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 input,
@@ -101,6 +125,11 @@ textarea {
     -moz-user-select: text;
     -ms-user-select: text;
     user-select: text;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
 }
 
 #app {
