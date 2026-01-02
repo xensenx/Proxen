@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praxis.Lite</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- App Container -->
+    <div id="app">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-label">Praxis.Lite</div>
+                    <div class="header-divider"></div>
+                    <div class="header-version">v1.0</div>
+                </div>
+                <button id="reset-btn" class="reset-btn hidden" title="Clear all data and reset">
+                    Reset System
+                </button>
+            </div>
+        </header>
+
+        <!-- VIEW: LANDING -->
+        <section id="view-landing" class="view-section hidden">
+            <div class="landing-container">
+                <div class="landing-content">
+                    <!-- Main heading -->
+                    <div class="landing-header">
+                        <h1 class="landing-title">
+                            <span class="title-line primary">The user talks.</span>
+                            <span class="title-line primary">The AI organizes.</span>
+                            <span class="title-line secondary">The Task Gets Done.</span>
+                        </h1>
+                        <div class="title-underline"></div>
+                    </div>
+
+                    <!-- Core principles -->
+                    <div class="landing-sections">
+                        <div class="landing-section">
+                            <h2 class="section-title">What this is</h2>
+                            <p class="section-text">
+                                A local-first productivity tool built on a simple principle: 
+                                <span class="text-emphasis">you shouldn't have to manage structure while you're trying to think</span>.
+                            </p>
+                            <p class="section-text">
+                                You speak naturally. The AI translates your thoughts into tasks. 
+                                The interface shows you what's real.
+                            </p>
+                        </div>
+
+                        <div class="landing-section">
+                            <h2 class="section-title">How it works</h2>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <span class="feature-arrow">→</span>
+                                    <span>You don't click checkboxes. You don't fill in forms. You talk.</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-arrow">→</span>
+                                    <span>The AI organizes your thoughts into actionable tasks.</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-arrow">→</span>
+                                    <span>When you complete something, you say so. The AI updates the state.</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-arrow">→</span>
+                                    <span>The list is a reflection of reality, not a control panel.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="landing-section">
+                            <h2 class="section-title">What makes this different</h2>
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <div class="card-title">No accounts</div>
+                                    <div class="card-text">No registration, no authentication, no user profiles.</div>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="card-title">No servers</div>
+                                    <div class="card-text">Your data never leaves your browser. Ever.</div>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="card-title">No cloud sync</div>
+                                    <div class="card-text">Local-only. Device-specific. Private by architecture.</div>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="card-title">No tracking</div>
+                                    <div class="card-text">We literally cannot see what you're doing.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="landing-section">
+                            <h2 class="section-title">About the AI</h2>
+                            <p class="section-text">
+                                This tool uses an AI companion that acts as a productivity partner. 
+                                It's not a cheerleader. It's not a therapist. It's not trying to be your friend.
+                            </p>
+                            <p class="section-text">
+                                Think of it as <span class="text-emphasis">a tired but competent person</span> who helps you 
+                                track what needs doing. Slightly dry. Occasionally sarcastic. Always focused on getting things done.
+                            </p>
+                            <p class="section-text">
+                                It will acknowledge your progress without making it feel like a participation trophy.
+                            </p>
+                        </div>
+
+                        <div class="landing-footer">
+                            <p class="footer-text">
+                                This is version 1. It does one thing: helps you externalize and complete tasks 
+                                without feeling alone. Nothing more, nothing less.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="landing-cta">
+                        <button onclick="app.transition('apiKey')" class="cta-button">
+                            <span class="cta-text">Initialize System</span>
+                            <span class="cta-arrow">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: API KEY -->
+        <section id="view-apiKey" class="view-section centered-view hidden">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">Authentication Required</h2>
+                    <div class="title-underline"></div>
+                </div>
+
+                <div class="form-description">
+                    <p class="section-text">
+                        This tool uses <span class="text-emphasis">Google's Gemma 3 27B IT</span> model 
+                        for all AI interactions. This model offers higher request limits than alternatives.
+                    </p>
+                    <p class="section-text">
+                        You must provide your own API key. The key is stored locally in your browser's 
+                        <code class="code-inline">localStorage</code> 
+                        and is only sent directly to Google's API when you interact with the AI.
+                    </p>
+                    <p class="section-text muted">
+                        We never see your key. We never handle your requests. This is direct communication 
+                        between your browser and Google's servers.
+                    </p>
+                </div>
+
+                <div class="form-inputs">
+                    <div class="input-wrapper">
+                        <input type="password" 
+                               id="api-key-input" 
+                               placeholder="Paste your Gemini API key here" 
+                               class="text-input"
+                               autocomplete="off">
+                        <div class="input-icon">
+                            <div class="key-dots">●●●</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <div class="form-links">
+                            <a href="https://aistudio.google.com/app/apikey" 
+                               target="_blank" 
+                               class="form-link">
+                                Get a key from Google AI Studio →
+                            </a>
+                            <button onclick="app.openTestModal()" class="form-link test-link">
+                                Test your API key first ⚡
+                            </button>
+                        </div>
+                        <button onclick="app.saveApiKey()" class="btn-primary">
+                            Continue
+                        </button>
+                    </div>
+                    <p id="api-error" class="error-text hidden">
+                        Invalid key format. Check the key and try again.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Test Modal -->
+        <div id="test-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="app.closeTestModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Test API Key</h3>
+                    <button class="modal-close" onclick="app.closeTestModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-description">
+                        Verify your API key works before continuing. This will make test requests to Gemma 3 27B IT.
+                    </p>
+                    <input type="password" 
+                           id="test-api-input" 
+                           placeholder="Paste your API key here" 
+                           class="text-input">
+                    <button onclick="app.runAPITest()" class="btn-primary" id="test-btn">
+                        Run Test
+                    </button>
+                    <div id="test-results" class="test-results hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: NAME ENTRY -->
+        <section id="view-name" class="view-section centered-view hidden">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">Identity</h2>
+                    <div class="title-underline"></div>
+                </div>
+
+                <div class="form-description">
+                    <p class="section-text">
+                        What should the system call you?
+                    </p>
+                    <p class="section-text muted">
+                        This is purely for personalization. The AI will use this name in conversation. 
+                        You can use your real name, a nickname, or anything else. It doesn't matter to us.
+                    </p>
+                </div>
+
+                <div class="form-inputs">
+                    <input type="text" 
+                           id="name-input" 
+                           placeholder="Name or alias" 
+                           autocomplete="off"
+                           class="text-input">
+                    
+                    <div class="form-actions right">
+                        <button onclick="app.saveName()" class="btn-primary">
+                            Begin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: WORKSPACE -->
+        <section id="view-workspace" class="view-section workspace-view hidden">
+            
+            <!-- Main Content: Chat with inline tasks -->
+            <div class="main-content">
+                
+                <!-- Chat Timeline -->
+                <div id="chat-timeline" class="chat-timeline">
+                    <!-- Empty state shown before first interaction -->
+                    <div id="empty-workspace" class="empty-workspace">
+                        <div class="empty-icon">○</div>
+                        <p class="empty-text">System idle</p>
+                        <p class="empty-subtext">Start a conversation to begin</p>
+                    </div>
+                </div>
+
+                <!-- Suggestions Panel (shows on empty or when requested) -->
+                <div id="suggestions-panel" class="suggestions-panel">
+                    <div class="suggestions-header">Try saying:</div>
+                    <div class="suggestion-pills">
+                        <button class="suggestion-pill" data-prompt="I need to finish my CS assignment by Thursday">
+                            "I need to finish my CS assignment by Thursday"
+                        </button>
+                        <button class="suggestion-pill" data-prompt="Done with the readings">
+                            "Done with the readings"
+                        </button>
+                        <button class="suggestion-pill" data-prompt="Help me break down studying for finals">
+                            "Help me break down studying for finals"
+                        </button>
+                        <button class="suggestion-pill" data-prompt="What should I tackle first?">
+                            "What should I tackle first?"
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar: Current state overview -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <span class="sidebar-title">Active</span>
+                        <span id="task-count" class="task-count-badge">0</span>
+                    </div>
+                    <div id="active-tasks" class="sidebar-tasks"></div>
+                </div>
+
+                <div class="sidebar-section faded">
+                    <div class="sidebar-header">
+                        <span class="sidebar-title">Complete</span>
+                    </div>
+                    <div id="completed-tasks" class="sidebar-tasks"></div>
+                </div>
+            </aside>
+
+            <!-- Input Area (fixed at bottom) -->
+            <div class="input-section">
+                <!-- Status bar -->
+                <div class="status-bar">
+                    <div class="status-left">
+                        <div id="status-dot" class="status-dot ready"></div>
+                        <span id="status-text" class="status-text">Ready</span>
+                    </div>
+                    <div class="status-right">
+                        <button id="help-btn" class="help-btn" title="Show suggestions">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input field -->
+                <div class="input-wrapper">
+                    <textarea id="user-input" 
+                              placeholder="What needs doing?" 
+                              rows="1"
+                              class="user-input"></textarea>
+                    <button id="send-btn" 
+                            disabled
+                            class="send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Typing indicator -->
+                <div id="typing-indicator" class="typing-indicator hidden">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-label">Processing</span>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <span class="footer-text">Praxis.Lite</span>
+            <span class="footer-divider">•</span>
+            <span class="footer-text">© 2026</span>
+            <span class="footer-divider">•</span>
+            <span class="footer-text muted">Local-first Productivity Tool By Mohammed Siddiq</span>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
