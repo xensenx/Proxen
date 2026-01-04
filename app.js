@@ -49,7 +49,8 @@ const App = {
             transparencyToggle: document.getElementById('transparency-toggle'),
             transparencyContent: document.getElementById('transparency-content'),
             scopeToggle: document.getElementById('scope-toggle'),
-            scopeContent: document.getElementById('scope-content')
+            scopeContent: document.getElementById('scope-content'),
+            setupOverlay: document.getElementById('setup-overlay')
         };
 
         // Load saved state
@@ -572,18 +573,24 @@ Respond with ONLY this JSON format (no markdown, no other text):
     },
 
     async startInitialConversation() {
+        // Show setup overlay to prevent user interaction
+        this.DOM.setupOverlay.classList.remove('hidden');
+        this.DOM.userInput.disabled = true;
+        this.DOM.sendBtn.disabled = true;
+        
         this.DOM.emptyWorkspace.classList.add('hidden');
         this.DOM.suggestionsPanel.classList.remove('hidden');
         
         this.setStatus('processing');
-        this.DOM.typingIndicator.classList.remove('hidden');
         
         try {
             const greeting = await this.callAI(
                 `The user just opened the application. Their name is ${this.state.userName}. Give a natural greeting and ask what needs doing. Be slightly dry but warm. 2-3 sentences.`
             );
             
-            this.DOM.typingIndicator.classList.add('hidden');
+            // Hide setup overlay once complete
+            this.DOM.setupOverlay.classList.add('hidden');
+            this.DOM.userInput.disabled = false;
             this.setStatus('ready');
             
             if (greeting.conversational_response) {
@@ -599,7 +606,9 @@ Respond with ONLY this JSON format (no markdown, no other text):
             }
             
         } catch (error) {
-            this.DOM.typingIndicator.classList.add('hidden');
+            // Hide setup overlay on error too
+            this.DOM.setupOverlay.classList.add('hidden');
+            this.DOM.userInput.disabled = false;
             this.setStatus('error');
             this.handleError(error);
         }

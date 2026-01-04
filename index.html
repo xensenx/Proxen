@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Proxen</title>
+    <title>Proxen - Privacy-focused AI to-do list</title>
     <meta name="google-site-verification" content="google-site-verification=mkMJ_7ghtkSU3ssMFUsK_pOe76gULNfzKuectzQQVKQ" />
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -598,6 +598,19 @@
 
         <!-- VIEW: WORKSPACE -->
         <section id="view-workspace" class="view-section workspace-view hidden">
+            
+            <!-- System Setup Overlay -->
+            <div id="setup-overlay" class="setup-overlay hidden">
+                <div class="setup-content">
+                    <div class="setup-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p class="setup-text">Initializing system...</p>
+                    <p class="setup-subtext">Setting up your workspace</p>
+                </div>
+            </div>
             
             <!-- Main Content: Chat with inline tasks -->
             <div class="main-content">
