@@ -1,27 +1,33 @@
 {
   "name": "Proxen - Privacy AI To-Do",
   "short_name": "Proxen",
-  "description": "A privacy-focused AI productivity tool that helps you plan tasks without tracking.",
-  "start_url": "/?source=pwa",
+  "description": "A privacy-focused AI productivity tool.",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 32x32 48x48",
       "type": "image/x-icon"
     },
     {
-      "src": "favicon.ico",
-      "sizes": "192x192",
+      "src": "assets/icon-192.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
-      "src": "favicon.ico",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ]
 }
