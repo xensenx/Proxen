@@ -601,6 +601,39 @@
         <!-- VIEW: WORKSPACE -->
         <section id="view-workspace" class="view-section workspace-view hidden">
             
+            <!-- TASK DRAWER - Pull down from top like notifications -->
+            <div id="task-drawer" class="task-drawer">
+                <div class="drawer-tab" id="drawer-tab">
+                    <div class="tab-handle"></div>
+                    <span class="task-badge" id="task-badge">0</span>
+                </div>
+                
+                <div class="drawer-panel" id="drawer-panel">
+                    <div class="drawer-header">
+                        <h3>Tasks</h3>
+                        <button class="drawer-close-btn" id="drawer-close">×</button>
+                    </div>
+                    
+                    <div class="drawer-body">
+                        <div class="task-group">
+                            <div class="task-group-header">
+                                <span>Active</span>
+                                <span class="task-count" id="active-count">0</span>
+                            </div>
+                            <div id="active-tasks" class="task-list"></div>
+                        </div>
+                        
+                        <div class="task-group completed-group">
+                            <div class="task-group-header">
+                                <span>Completed</span>
+                                <span class="task-count" id="completed-count">0</span>
+                            </div>
+                            <div id="completed-tasks" class="task-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- System Setup Overlay -->
             <div id="setup-overlay" class="setup-overlay hidden">
                 <div class="setup-content">
@@ -647,24 +680,6 @@
                 </div>
 
             </div>
-
-            <!-- Sidebar: Current state overview -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-header">
-                        <span class="sidebar-title">Active</span>
-                        <span id="task-count" class="task-count-badge">0</span>
-                    </div>
-                    <div id="active-tasks" class="sidebar-tasks"></div>
-                </div>
-
-                <div class="sidebar-section faded">
-                    <div class="sidebar-header">
-                        <span class="sidebar-title">Complete</span>
-                    </div>
-                    <div id="completed-tasks" class="sidebar-tasks"></div>
-                </div>
-            </aside>
 
             <!-- Input Area (fixed at bottom) -->
             <div class="input-section">

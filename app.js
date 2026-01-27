@@ -30,12 +30,17 @@ const App = {
             suggestionsPanel: document.getElementById('suggestions-panel'),
             activeTasks: document.getElementById('active-tasks'),
             completedTasks: document.getElementById('completed-tasks'),
+            activeCount: document.getElementById('active-count'),
+            completedCount: document.getElementById('completed-count'),
+            taskBadge: document.getElementById('task-badge'),
+            taskDrawer: document.getElementById('task-drawer'),
+            drawerTab: document.getElementById('drawer-tab'),
+            drawerClose: document.getElementById('drawer-close'),
             userInput: document.getElementById('user-input'),
             sendBtn: document.getElementById('send-btn'),
             helpBtn: document.getElementById('help-btn'),
             statusDot: document.getElementById('status-dot'),
             statusText: document.getElementById('status-text'),
-            taskCount: document.getElementById('task-count'),
             typingIndicator: document.getElementById('typing-indicator'),
             testModal: document.getElementById('test-modal'),
             testApiInput: document.getElementById('test-api-input'),
@@ -63,7 +68,7 @@ const App = {
             this.transition('name');
         } else {
             this.transition('workspace');
-            this.renderSidebarTasks();
+            this.updateDrawerTasks();
             if (this.state.conversationHistory.length === 0) {
                 this.startInitialConversation();
             } else {
@@ -103,6 +108,14 @@ const App = {
         });
         
         this.DOM.sendBtn.addEventListener('click', () => this.sendMessage());
+
+        // Initialize task drawer
+        if (this.DOM.drawerTab) {
+            this.DOM.drawerTab.addEventListener('click', () => this.toggleDrawer());
+        }
+        if (this.DOM.drawerClose) {
+            this.DOM.drawerClose.addEventListener('click', () => this.closeDrawer());
+        }
 
         // Suggestion pill handlers
         document.addEventListener('click', (e) => {
@@ -471,7 +484,7 @@ Respond with ONLY this JSON format (no markdown, no other text):
         }
     },
 
-    addMessageToTimeline(text, sender, taskChanges = null) {
+    addMessageToTimeline(text, sender) {
         const container = document.createElement('div');
         container.className = `message ${sender}-message`;
         
@@ -480,30 +493,6 @@ Respond with ONLY this JSON format (no markdown, no other text):
         bubble.className = 'message-bubble';
         bubble.textContent = text;
         container.appendChild(bubble);
-        
-        // Task changes container (if any) - with gray fade animation
-        if (taskChanges && taskChanges.length > 0) {
-            const changesDiv = document.createElement('div');
-            changesDiv.className = 'task-change';
-            
-            const header = document.createElement('div');
-            header.className = 'task-change-header';
-            header.textContent = 'Task Updates';
-            changesDiv.appendChild(header);
-            
-            taskChanges.forEach(change => {
-                const item = document.createElement('div');
-                item.className = `task-change-item ${change.type}`;
-                
-                const icon = change.type === 'added' ? '+' : 
-                    change.type === 'completed' ? '✓' : '×';
-                
-                item.innerHTML = `<span class="change-icon">${icon}</span><span class="change-text">${change.description}</span>`;
-                changesDiv.appendChild(item);
-            });
-            
-            container.appendChild(changesDiv);
-        }
         
         // Timestamp
         const timestamp = document.createElement('div');
@@ -523,35 +512,57 @@ Respond with ONLY this JSON format (no markdown, no other text):
         this.DOM.chatTimeline.scrollTop = this.DOM.chatTimeline.scrollHeight;
     },
 
-    renderSidebarTasks() {
+    toggleDrawer() {
+        if (this.DOM.taskDrawer.classList.contains('open')) {
+            this.closeDrawer();
+        } else {
+            this.openDrawer();
+        }
+    },
+
+    openDrawer() {
+        this.DOM.taskDrawer.classList.add('open');
+        this.DOM.taskDrawer.classList.remove('peek');
+    },
+
+    closeDrawer() {
+        this.DOM.taskDrawer.classList.remove('open');
+    },
+
+    peekDrawer() {
+        if (!this.DOM.taskDrawer.classList.contains('open')) {
+            this.DOM.taskDrawer.classList.add('peek');
+            this.DOM.taskBadge.classList.add('pulse');
+            
+            setTimeout(() => {
+                this.DOM.taskDrawer.classList.remove('peek');
+                this.DOM.taskBadge.classList.remove('pulse');
+            }, 2500);
+        }
+    },
+
+    updateDrawerTasks() {
         const active = this.state.tasks.filter(t => !t.completed);
-        const completed = this.state.tasks.filter(t => t.completed).slice(-5);
+        const completed = this.state.tasks.filter(t => t.completed);
         
-        // Update count badge
-        this.DOM.taskCount.textContent = active.length;
+        // Update badge and counts
+        this.DOM.taskBadge.textContent = active.length;
+        this.DOM.activeCount.textContent = active.length;
+        this.DOM.completedCount.textContent = completed.length;
         
         // Render active tasks
-        if (active.length === 0) {
-            this.DOM.activeTasks.innerHTML = '<div class="empty-tasks">No active tasks</div>';
-        } else {
-            this.DOM.activeTasks.innerHTML = active.map(task => `
-                <div class="task-item">
-                    <div class="task-title">${this.escapeHtml(task.title)}</div>
-                    ${task.notes ? `<div class="task-notes">${this.escapeHtml(task.notes)}</div>` : ''}
-                </div>
-            `).join('');
-        }
+        this.DOM.activeTasks.innerHTML = active.map(task => `
+            <div class="task-item">
+                <div class="task-item-title">${this.escapeHtml(task.title)}</div>
+            </div>
+        `).join('');
         
         // Render completed tasks
-        if (completed.length === 0) {
-            this.DOM.completedTasks.innerHTML = '<div class="empty-tasks">None recently</div>';
-        } else {
-            this.DOM.completedTasks.innerHTML = completed.map(task => `
-                <div class="task-item completed">
-                    <div class="task-title">${this.escapeHtml(task.title)}</div>
-                </div>
-            `).join('');
-        }
+        this.DOM.completedTasks.innerHTML = completed.map(task => `
+            <div class="task-item completed">
+                <div class="task-item-title">${this.escapeHtml(task.title)}</div>
+            </div>
+        `).join('');
     },
 
     escapeHtml(text) {
@@ -564,7 +575,7 @@ Respond with ONLY this JSON format (no markdown, no other text):
         this.DOM.chatTimeline.innerHTML = '';
         
         this.state.conversationHistory.forEach(msg => {
-            this.addMessageToTimeline(msg.text, msg.sender, msg.taskChanges || null);
+            this.addMessageToTimeline(msg.text, msg.sender);
         });
         
         if (this.state.conversationHistory.length === 1) {
@@ -1111,21 +1122,25 @@ Remember: Respond with ONLY valid JSON. No text before or after. No markdown blo
                 }
             });
             
-            this.renderSidebarTasks();
+            if (taskChanges.length > 0) {
+                this.updateDrawerTasks();
+                const hasNewTask = taskChanges.some(c => c.type === 'added');
+                if (hasNewTask) {
+                    this.peekDrawer();
+                }
+            }
         }
         
         if (data.conversational_response) {
             this.addMessageToTimeline(
                 data.conversational_response, 
-                'ai',
-                taskChanges.length > 0 ? taskChanges : null
+                'ai'
             );
             
             this.state.conversationHistory.push({
                 text: data.conversational_response,
                 sender: 'ai',
-                timestamp: Date.now(),
-                taskChanges: taskChanges.length > 0 ? taskChanges : null
+                timestamp: Date.now()
             });
         }
         
