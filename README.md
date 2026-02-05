@@ -402,7 +402,7 @@ All core features from the previous version remain:
 
 ## Credits
 
-Original concept and implementation by user.  
+Original concept and implementation by xensenx.  
 Gemma 3 27B IT integration improvements focused on:
 - Proper REST API usage without problematic parameters
 - Robust error handling and retry logic
