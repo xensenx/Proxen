@@ -32,7 +32,7 @@ class StateManager {
             console.error('Failed to save state:', e);
         }
     }
-
+    
     reset() {
         localStorage.removeItem('focus_local_state');
     }
@@ -295,9 +295,11 @@ Be real. Be human. Help them get it done.`;
                  throw new Error(`API_ERROR|Server returned ${authTest.status}: ${errorData.error?.message || authTest.statusText}`);
              }
         }
-
+        
         const authData = await authTest.json();
-        if (!authData.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const authCandidate = authData.candidates?.[0];
+        const authPart = authCandidate?.content?.parts?.find(p => !p.thought) || authCandidate?.content?.parts?.[0];
+        if (!authPart?.text) {
              throw new Error('EMPTY_RESPONSE|API returned empty response. Try again.');
         }
 
@@ -309,8 +311,8 @@ Be real. Be human. Help them get it done.`;
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{
-                            text: 'Respond with ONLY this exact JSON (no other text): {"test": "passed", "ready": true}'
+                        parts: [{ 
+                            text: 'Respond with ONLY this exact JSON (no other text): {"test": "passed", "ready": true}' 
                         }]
                     }],
                     generationConfig: { maxOutputTokens: 50 }
@@ -321,9 +323,11 @@ Be real. Be human. Help them get it done.`;
         if (!jsonTest.ok) {
             throw new Error('JSON_TEST_FAILED|Could not complete structured output test.');
         }
-
+        
         const jsonData = await jsonTest.json();
-        const jsonText = jsonData.candidates[0].content.parts[0].text.trim();
+        const jsonCandidate = jsonData.candidates?.[0];
+        const jsonPart = jsonCandidate?.content?.parts?.find(p => !p.thought) || jsonCandidate?.content?.parts?.[0];
+        const jsonText = (jsonPart?.text || '').trim();
         let cleanJson = jsonText;
         if (jsonText.includes('```')) {
              cleanJson = jsonText.replace(/```json\s*|\s*```/g, '').trim();
@@ -341,8 +345,8 @@ Be real. Be human. Help them get it done.`;
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{
-                            text: `You are a task assistant. User says: "I need to write the essay"\n\nRespond with ONLY this JSON format (no markdown, no other text):\n{\n  "conversational_response": "Brief acknowledgment",\n  "actions": [{"type": "add", "title": "Write the essay", "notes": ""}],\n  "isWaitingForClarification": false\n}`
+                        parts: [{ 
+                            text: `You are a task assistant. User says: "I need to write the essay"\n\nRespond with ONLY this JSON format (no markdown, no other text):\n{\n  "conversational_response": "Brief acknowledgment",\n  "actions": [{"type": "add", "title": "Write the essay", "notes": ""}],\n  "isWaitingForClarification": false\n}` 
                         }]
                     }],
                     generationConfig: { maxOutputTokens: 150 }
@@ -353,10 +357,12 @@ Be real. Be human. Help them get it done.`;
         if (!taskTest.ok) {
             throw new Error('TASK_TEST_FAILED|Could not complete task parsing test.');
         }
-
+        
         const taskData = await taskTest.json();
-        const taskText = taskData.candidates[0].content.parts[0].text.trim();
-
+        const taskCandidate = taskData.candidates?.[0];
+        const taskPart = taskCandidate?.content?.parts?.find(p => !p.thought) || taskCandidate?.content?.parts?.[0];
+        const taskText = (taskPart?.text || '').trim();
+        
         let cleanTask = taskText;
         if (taskText.includes('```')) {
             cleanTask = taskText.replace(/```json\s*|\s*```/g, '').trim();
@@ -430,11 +436,12 @@ Be real. Be human. Help them get it done.`;
                     throw new Error('CONTENT_BLOCKED|Response blocked by safety filters');
                 }
                 
-                if (!candidate.content?.parts?.[0]?.text) {
+                const responsePart = candidate.content?.parts?.find(p => !p.thought) || candidate.content?.parts?.[0];
+                if (!responsePart?.text) {
                     throw new Error('EMPTY_TEXT|No text in response');
                 }
                 
-                let text = candidate.content.parts[0].text.trim();
+                let text = responsePart.text.trim();
                 
                 // Clean markdown
                 if (text.startsWith('```')) {
@@ -523,23 +530,23 @@ class UIController {
         this.DOM.resetBtn.addEventListener('click', () => this.app.reset());
         this.DOM.helpBtn.addEventListener('click', () => this.toggleSuggestions());
         this.DOM.versionBtn.addEventListener('click', () => this.showChangelog());
-
+        
         this.DOM.transparencyToggle.addEventListener('click', () => this.toggleTransparency());
         this.DOM.scopeToggle.addEventListener('click', () => this.toggleScope());
-
+        
         this.DOM.apiKeyInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') this.app.saveApiKey();
         });
-
+        
         this.DOM.nameInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') this.app.saveName();
         });
-
+        
         this.DOM.userInput.addEventListener('input', (e) => {
             this.autoResize(e.target);
             this.DOM.sendBtn.disabled = !e.target.value.trim();
         });
-
+        
         this.DOM.userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -548,7 +555,7 @@ class UIController {
                 }
             }
         });
-
+        
         this.DOM.sendBtn.addEventListener('click', () => this.app.sendMessage());
 
         if (this.DOM.drawerTab) {
@@ -573,10 +580,10 @@ class UIController {
         Object.values(this.DOM.views).forEach(view => {
             view.classList.add('hidden');
         });
-
+        
         if (this.DOM.views[viewName]) {
             this.DOM.views[viewName].classList.remove('hidden');
-
+            
             if (viewName === 'workspace') {
                 this.DOM.resetBtn.classList.remove('hidden');
             } else {
@@ -589,12 +596,12 @@ class UIController {
         this.DOM.testModal.classList.remove('hidden');
         this.DOM.testResults.classList.add('hidden');
         this.DOM.testResults.innerHTML = '';
-
+        
         const currentKey = this.DOM.apiKeyInput.value.trim();
         if (currentKey) {
             this.DOM.testApiInput.value = currentKey;
         }
-
+        
         setTimeout(() => this.DOM.testApiInput.focus(), 100);
     }
 
@@ -657,7 +664,7 @@ class UIController {
             icon.textContent = '▼';
         }
     }
-
+    
     toggleSuggestions() {
         const panel = this.DOM.suggestionsPanel;
         panel.classList.toggle('hidden');
@@ -672,7 +679,7 @@ class UIController {
         const dot = this.DOM.statusDot;
         const text = this.DOM.statusText;
         dot.className = 'status-dot';
-
+        
         if (status === 'processing') {
             dot.classList.add('processing');
             text.textContent = 'Processing';
@@ -688,20 +695,20 @@ class UIController {
     addMessageToTimeline(text, sender) {
         const container = document.createElement('div');
         container.className = `message ${sender}-message`;
-
+        
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         bubble.textContent = text;
         container.appendChild(bubble);
-
+        
         const timestamp = document.createElement('div');
         timestamp.className = 'message-timestamp';
-        timestamp.textContent = new Date().toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit'
+        timestamp.textContent = new Date().toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit' 
         });
         container.appendChild(timestamp);
-
+        
         this.DOM.chatTimeline.appendChild(container);
         this.DOM.emptyWorkspace.classList.add('hidden');
         this.DOM.chatTimeline.scrollTop = this.DOM.chatTimeline.scrollHeight;
@@ -738,17 +745,17 @@ class UIController {
     updateDrawerTasks(tasks) {
         const active = tasks.filter(t => !t.completed);
         const completed = tasks.filter(t => t.completed);
-
+        
         this.DOM.taskBadge.textContent = active.length;
         this.DOM.activeCount.textContent = active.length;
         this.DOM.completedCount.textContent = completed.length;
-
+        
         this.DOM.activeTasks.innerHTML = active.map(task => `
             <div class="task-item">
                 <div class="task-item-title">${this.escapeHtml(task.title)}</div>
             </div>
         `).join('');
-
+        
         this.DOM.completedTasks.innerHTML = completed.map(task => `
             <div class="task-item completed">
                 <div class="task-item-title">${this.escapeHtml(task.title)}</div>
@@ -825,19 +832,19 @@ class ProxenApp {
     async runAPITest() {
         const apiKey = this.ui.DOM.testApiInput.value.trim();
         const results = this.ui.DOM.testResults;
-
+        
         if (!apiKey) {
             results.innerHTML = '<div class="test-step error"><div class="test-step-title">❌ No API key provided</div><div class="test-step-result">Please paste your API key above.</div></div>';
             results.classList.remove('hidden', 'success');
             results.classList.add('error');
             return;
         }
-
+        
         this.ui.DOM.testBtn.disabled = true;
         this.ui.DOM.testBtn.textContent = 'Testing...';
         results.classList.remove('hidden', 'success', 'error');
         results.innerHTML = '<div class="test-step info"><div class="test-step-title">⏳ Running diagnostics...</div></div>';
-
+        
         try {
             results.innerHTML += '<div class="test-step info"><div class="test-step-title">→ Step 1: Testing API authentication...</div></div>';
             await this.apiService.testKey(apiKey); // Note: we merged tests for simplicity, apiService handles it now and throws on first error.
@@ -851,7 +858,7 @@ class ProxenApp {
         } catch (error) {
             let errorMessage = 'Unknown error';
             let suggestion = 'Please try again or check your API key.';
-
+            
             if (error.message.includes('|')) {
                 const [code, msg] = error.message.split('|');
                 errorMessage = msg;
@@ -889,16 +896,16 @@ class ProxenApp {
         this.ui.DOM.emptyWorkspace.classList.add('hidden');
         this.ui.DOM.suggestionsPanel.classList.remove('hidden');
         this.ui.setStatus('processing');
-
+        
         try {
             const greeting = await this.apiService.callAI(
                 `The user just opened the application. Their name is ${this.stateManager.state.userName}. Give a natural greeting and ask what needs doing. Be slightly dry but warm. 2-3 sentences.`
             );
-
+            
             this.ui.DOM.setupOverlay.classList.add('hidden');
             this.ui.DOM.userInput.disabled = false;
             this.ui.setStatus('ready');
-
+            
             if (greeting.conversational_response) {
                 this.ui.addMessageToTimeline(greeting.conversational_response, 'ai');
                 this.stateManager.state.conversationHistory.push({
@@ -908,7 +915,7 @@ class ProxenApp {
                 });
                 this.stateManager.saveState();
             }
-
+            
         } catch (error) {
             this.ui.DOM.setupOverlay.classList.add('hidden');
             this.ui.DOM.userInput.disabled = false;
@@ -920,21 +927,21 @@ class ProxenApp {
     async sendMessage() {
         const message = this.ui.DOM.userInput.value.trim();
         if (!message) return;
-
+        
         this.ui.addMessageToTimeline(message, 'user');
         this.stateManager.state.conversationHistory.push({
             text: message,
             sender: 'user',
             timestamp: Date.now()
         });
-
+        
         this.ui.DOM.userInput.value = '';
         this.ui.autoResize(this.ui.DOM.userInput);
         this.ui.DOM.sendBtn.disabled = true;
         this.ui.DOM.suggestionsPanel.classList.add('hidden');
         this.ui.setStatus('processing');
         this.ui.DOM.typingIndicator.classList.remove('hidden');
-
+        
         try {
             const response = await this.apiService.callAI(message);
             this.ui.DOM.typingIndicator.classList.add('hidden');
@@ -1063,7 +1070,7 @@ class ProxenApp {
         const lower = titleSnippet.toLowerCase();
         return this.stateManager.state.tasks.findIndex(t => t.title.toLowerCase().includes(lower));
     }
-
+    
     // Delegation for UI button clicks
     showTestModal() { this.ui.showTestModal(); }
     closeTestModal() { this.ui.closeTestModal(); }
