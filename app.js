@@ -297,7 +297,9 @@ Be real. Be human. Help them get it done.`;
         }
 
         const authData = await authTest.json();
-        if (!authData.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const authCandidate = authData.candidates?.[0];
+        const authPart = authCandidate?.content?.parts?.find(p => !p.thought) || authCandidate?.content?.parts?.[0];
+        if (!authPart?.text) {
              throw new Error('EMPTY_RESPONSE|API returned empty response. Try again.');
         }
 
@@ -323,7 +325,9 @@ Be real. Be human. Help them get it done.`;
         }
 
         const jsonData = await jsonTest.json();
-        const jsonText = jsonData.candidates[0].content.parts[0].text.trim();
+        const jsonCandidate = jsonData.candidates?.[0];
+        const jsonPart = jsonCandidate?.content?.parts?.find(p => !p.thought) || jsonCandidate?.content?.parts?.[0];
+        const jsonText = (jsonPart?.text || '').trim();
         let cleanJson = jsonText;
         if (jsonText.includes('```')) {
              cleanJson = jsonText.replace(/```json\s*|\s*```/g, '').trim();
@@ -355,7 +359,9 @@ Be real. Be human. Help them get it done.`;
         }
 
         const taskData = await taskTest.json();
-        const taskText = taskData.candidates[0].content.parts[0].text.trim();
+        const taskCandidate = taskData.candidates?.[0];
+        const taskPart = taskCandidate?.content?.parts?.find(p => !p.thought) || taskCandidate?.content?.parts?.[0];
+        const taskText = (taskPart?.text || '').trim();
 
         let cleanTask = taskText;
         if (taskText.includes('```')) {
@@ -430,11 +436,12 @@ Be real. Be human. Help them get it done.`;
                     throw new Error('CONTENT_BLOCKED|Response blocked by safety filters');
                 }
                 
-                if (!candidate.content?.parts?.[0]?.text) {
+                const responsePart = candidate.content?.parts?.find(p => !p.thought) || candidate.content?.parts?.[0];
+                if (!responsePart?.text) {
                     throw new Error('EMPTY_TEXT|No text in response');
                 }
                 
-                let text = candidate.content.parts[0].text.trim();
+                let text = responsePart.text.trim();
                 
                 // Clean markdown
                 if (text.startsWith('```')) {
