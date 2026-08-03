@@ -1,16 +1,16 @@
 # Proxen
 Proxen is a local-first productivity tool that helps you organize tasks through conversation. You tell it what you need to do, it structures the work, keeps track of progress, and pushes you forward without noise or gimmicks.
-# Proxen - Gemma 3 27B IT Integration
+# Proxen - Gemma 4 31B IT Integration
 
 ## Overview
 
-This version uses **Gemma 3 27B IT** (Instruction Tuned) via Google's REST API with proper error handling and retry logic. The integration avoids using `responseMimeType: "application/json"` which Gemma models reject via REST API.
+This version uses **Gemma 4 31B IT** (Instruction Tuned) via Google's REST API with proper error handling and retry logic. The integration avoids using `responseMimeType: "application/json"` which Gemma models reject via REST API.
 
 ---
 
 ## What Changed in This Version
 
-### 1. **Proper Gemma 3 27B IT REST API Integration**
+### 1. **Proper Gemma 4 31B IT REST API Integration**
 
 **Previous Issues**:
 - Used `responseMimeType: "application/json"` which Gemma models reject
@@ -21,7 +21,7 @@ This version uses **Gemma 3 27B IT** (Instruction Tuned) via Google's REST API w
 ```javascript
 // Direct REST API call without problematic parameters
 const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key=${apiKey}`,
     {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,7 +44,7 @@ const res = await fetch(
 **Key Changes**:
 - ✅ No `responseMimeType` parameter (causes 400 errors)
 - ✅ JSON format enforced via explicit prompt instructions
-- ✅ Proper endpoint: `gemma-3-27b-it:generateContent`
+- ✅ Proper endpoint: `gemma-4-31b-it:generateContent`
 - ✅ Clean response parsing with markdown cleanup
 - ✅ Comprehensive error handling
 
@@ -161,7 +161,7 @@ if (!parsed.conversational_response) {
 **Console Output**:
 ```javascript
 console.log(`API Call Attempt ${i + 1}/${retries}`);
-console.log('Making API request to Gemma 3 27B IT...');
+console.log('Making API request to Gemma 4 31B IT...');
 console.log('API Response Status:', res.status);
 console.log('API Response received:', data);
 console.log('Extracted text:', text);
@@ -172,7 +172,7 @@ Helps with debugging without cluttering user interface.
 
 ---
 
-## Why Gemma 3 27B IT?
+## Why Gemma 4 31B IT?
 
 **Benefits Over Alternatives**:
 - ✅ **Higher RPD (Requests Per Day)** on free tier
@@ -185,7 +185,7 @@ Helps with debugging without cluttering user interface.
 **Comparison**:
 | Model | RPD (Free Tier) | JSON Support | Speed | Task Accuracy |
 |-------|-----------------|--------------|-------|---------------|
-| Gemma 3 27B IT | **Higher** | Via prompt | Fast | Excellent |
+| Gemma 4 31B IT | **Higher** | Via prompt | Fast | Excellent |
 | Gemini Flash Lite | Lower | Native | Faster | Good |
 
 ---
@@ -215,7 +215,7 @@ Process Actions & Update UI
 ### API Endpoint Structure
 
 ```
-POST https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=YOUR_KEY
+POST https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key=YOUR_KEY
 
 Body:
 {
@@ -353,7 +353,7 @@ Response:
 4. Use "Test your API key first ⚡" before proceeding
 5. If tests pass, continue with setup
 
-**Note**: Keys are free but have daily request limits. Gemma 3 27B IT offers higher limits than most alternatives.
+**Note**: Keys are free but have daily request limits. Gemma 4 31B IT offers higher limits than most alternatives.
 
 ---
 
@@ -403,7 +403,7 @@ All core features from the previous version remain:
 ## Credits
 
 Original concept and implementation by xensenx.  
-Gemma 3 27B IT integration improvements focused on:
+Gemma 4 31B IT integration improvements focused on:
 - Proper REST API usage without problematic parameters
 - Robust error handling and retry logic
 - Comprehensive testing and validation
