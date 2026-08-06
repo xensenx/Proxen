@@ -277,9 +277,13 @@ Be real. Be human. Help them get it done.`;
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
+                        role: 'user',
                         parts: [{ text: 'Respond with exactly three words: "Authentication test passed"' }]
                     }],
-                    generationConfig: { maxOutputTokens: 20 }
+                    generationConfig: {
+                        maxOutputTokens: 20,
+                        thinkingConfig: { thinkingLevel: 'minimal' }
+                    }
                 })
             }
         );
@@ -311,11 +315,15 @@ Be real. Be human. Help them get it done.`;
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
+                        role: 'user',
                         parts: [{ 
                             text: 'Respond with ONLY this exact JSON (no other text): {"test": "passed", "ready": true}' 
                         }]
                     }],
-                    generationConfig: { maxOutputTokens: 50 }
+                    generationConfig: {
+                        maxOutputTokens: 50,
+                        thinkingConfig: { thinkingLevel: 'minimal' }
+                    }
                 })
             }
         );
@@ -344,12 +352,19 @@ Be real. Be human. Help them get it done.`;
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    systemInstruction: {
+                        parts: [{ text: 'You are a task assistant. Respond with ONLY valid JSON. No text before or after. No markdown blocks.' }]
+                    },
                     contents: [{
+                        role: 'user',
                         parts: [{ 
-                            text: `You are a task assistant. User says: "I need to write the essay"\n\nRespond with ONLY this JSON format (no markdown, no other text):\n{\n  "conversational_response": "Brief acknowledgment",\n  "actions": [{"type": "add", "title": "Write the essay", "notes": ""}],\n  "isWaitingForClarification": false\n}` 
+                            text: `User says: "I need to write the essay"\n\nRespond with ONLY this JSON format (no markdown, no other text):\n{\n  "conversational_response": "Brief acknowledgment",\n  "actions": [{"type": "add", "title": "Write the essay", "notes": ""}],\n  "isWaitingForClarification": false\n}` 
                         }]
                     }],
-                    generationConfig: { maxOutputTokens: 150 }
+                    generationConfig: {
+                        maxOutputTokens: 150,
+                        thinkingConfig: { thinkingLevel: 'minimal' }
+                    }
                 })
             }
         );
@@ -384,13 +399,18 @@ Be real. Be human. Help them get it done.`;
                 
                 const systemPrompt = this.getSystemPrompt();
                 
-                // Build conversation context
-                const recentContext = this.stateManager.state.conversationHistory
-                    .slice(-6)
-                    .map(msg => `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`)
-                    .join('\n');
-                
-                const fullPrompt = `${systemPrompt}\n\nRECENT CONVERSATION:\n${recentContext}\n\nUSER'S CURRENT MESSAGE:\n${userMessage}\n\nRemember: Respond with ONLY valid JSON. No text before or after. No markdown blocks.`;
+                // Build proper multi-turn contents array with alternating user/model roles
+                const recentHistory = this.stateManager.state.conversationHistory.slice(-6);
+                const contents = [
+                    ...recentHistory.map(msg => ({
+                        role: msg.sender === 'user' ? 'user' : 'model',
+                        parts: [{ text: msg.text }]
+                    })),
+                    {
+                        role: 'user',
+                        parts: [{ text: `${userMessage}\n\nRemember: Respond with ONLY valid JSON. No text before or after. No markdown blocks.` }]
+                    }
+                ];
 
                 const res = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key=${this.stateManager.state.apiKey}`,
@@ -398,12 +418,13 @@ Be real. Be human. Help them get it done.`;
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: fullPrompt }] }],
+                            systemInstruction: {
+                                parts: [{ text: systemPrompt }]
+                            },
+                            contents,
                             generationConfig: {
-                                temperature: 0.8,
-                                topK: 40,
-                                topP: 0.95,
                                 maxOutputTokens: 1024,
+                                thinkingConfig: { thinkingLevel: 'minimal' }
                             }
                         })
                     }
