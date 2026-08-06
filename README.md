@@ -1,5 +1,6 @@
 <h1 align = "center">
-  Proxen
+  Proxen 
+  <br>
   <sub><sup>A simple tool, that lets you organize your thoughts! try it out, its free!</sup></sub>
 <h1>
 
