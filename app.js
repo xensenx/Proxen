@@ -1,3 +1,41 @@
+/* ==========================================
+   THEME MANAGER
+   ========================================== */
+
+class ThemeManager {
+    constructor() {
+        this.STORAGE_KEY = 'proxen_theme';
+        this.current = localStorage.getItem(this.STORAGE_KEY) || 'dark';
+        this.apply(this.current);
+    }
+
+    apply(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        this.current = theme;
+        this.updateToggleIcon();
+    }
+
+    toggle() {
+        const next = this.current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(this.STORAGE_KEY, next);
+        this.apply(next);
+    }
+
+    updateToggleIcon() {
+        const icon = document.getElementById('theme-icon');
+        if (!icon) return;
+        icon.style.animation = 'none';
+        icon.textContent = this.current === 'dark' ? '🌙' : '☀️';
+        // Re-trigger animation
+        void icon.offsetWidth;
+        icon.style.animation = '';
+    }
+}
+
+/* ==========================================
+   STATE MANAGER
+   ========================================== */
+
 class StateManager {
     constructor() {
         this.state = {
@@ -501,6 +539,7 @@ Be real. Be human. Help them get it done.`;
 class UIController {
     constructor(app) {
         this.app = app;
+        this._lastDateLabel = null; // track last date divider rendered
         this.DOM = {
             views: {
                 landing: document.getElementById('view-landing'),
@@ -512,6 +551,7 @@ class UIController {
             apiError: document.getElementById('api-error'),
             nameInput: document.getElementById('name-input'),
             resetBtn: document.getElementById('reset-btn'),
+            themeToggle: document.getElementById('theme-toggle-btn'),
             chatTimeline: document.getElementById('chat-timeline'),
             emptyWorkspace: document.getElementById('empty-workspace'),
             suggestionsPanel: document.getElementById('suggestions-panel'),
@@ -551,6 +591,11 @@ class UIController {
         this.DOM.resetBtn.addEventListener('click', () => this.app.reset());
         this.DOM.helpBtn.addEventListener('click', () => this.toggleSuggestions());
         this.DOM.versionBtn.addEventListener('click', () => this.showChangelog());
+
+        // Theme toggle
+        if (this.DOM.themeToggle) {
+            this.DOM.themeToggle.addEventListener('click', () => this.app.themeManager.toggle());
+        }
         
         this.DOM.transparencyToggle.addEventListener('click', () => this.toggleTransparency());
         this.DOM.scopeToggle.addEventListener('click', () => this.toggleScope());
@@ -713,26 +758,57 @@ class UIController {
         }
     }
 
-    addMessageToTimeline(text, sender) {
+    _getDateLabel(timestamp) {
+        const d = timestamp ? new Date(timestamp) : new Date();
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        if (d.toDateString() === today.toDateString()) return 'Today';
+        if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    _insertDateDividerIfNeeded(timestamp) {
+        const label = this._getDateLabel(timestamp);
+        if (label === this._lastDateLabel) return;
+        this._lastDateLabel = label;
+        const divider = document.createElement('div');
+        divider.className = 'chat-date-divider';
+        divider.innerHTML = `<span class="chat-date-label">${label}</span>`;
+        this.DOM.chatTimeline.appendChild(divider);
+    }
+
+    addMessageToTimeline(text, sender, timestamp) {
+        this._insertDateDividerIfNeeded(timestamp);
+
         const container = document.createElement('div');
         container.className = `message ${sender}-message`;
-        
+
+        // Sender label
+        const senderLabel = document.createElement('div');
+        senderLabel.className = 'message-sender';
+        senderLabel.textContent = sender === 'user' ? 'You' : 'Proxen';
+        container.appendChild(senderLabel);
+
+        // Bubble
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         bubble.textContent = text;
         container.appendChild(bubble);
-        
-        const timestamp = document.createElement('div');
-        timestamp.className = 'message-timestamp';
-        timestamp.textContent = new Date().toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit' 
-        });
-        container.appendChild(timestamp);
-        
+
+        // Timestamp
+        const ts = document.createElement('div');
+        ts.className = 'message-timestamp';
+        const t = timestamp ? new Date(timestamp) : new Date();
+        ts.textContent = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        container.appendChild(ts);
+
         this.DOM.chatTimeline.appendChild(container);
         this.DOM.emptyWorkspace.classList.add('hidden');
-        this.DOM.chatTimeline.scrollTop = this.DOM.chatTimeline.scrollHeight;
+        // Smooth scroll to bottom
+        requestAnimationFrame(() => {
+            this.DOM.chatTimeline.scrollTop = this.DOM.chatTimeline.scrollHeight;
+        });
     }
 
     toggleDrawer() {
@@ -794,6 +870,7 @@ class UIController {
 
 class ProxenApp {
     constructor() {
+        this.themeManager = new ThemeManager();
         this.stateManager = new StateManager();
         this.apiService = new APIService(this.stateManager);
         this.ui = null;
@@ -902,8 +979,9 @@ class ProxenApp {
 
     restoreConversation() {
         this.ui.DOM.chatTimeline.innerHTML = '';
+        this.ui._lastDateLabel = null; // reset date tracking for restore
         this.stateManager.state.conversationHistory.forEach(msg => {
-            this.ui.addMessageToTimeline(msg.text, msg.sender);
+            this.ui.addMessageToTimeline(msg.text, msg.sender, msg.timestamp);
         });
         if (this.stateManager.state.conversationHistory.length === 1) {
             this.ui.DOM.suggestionsPanel.classList.remove('hidden');
